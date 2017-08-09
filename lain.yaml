@@ -1,0 +1,19 @@
+appname: tinydns-healthcheck
+
+build:
+  base: laincloud/golang:1.8.3
+  script:
+    - cp -rf . $GOPATH/src/github.com/laincloud/tinydns-healthcheck
+    - go install
+
+release:
+  dest_base: laincloud/centos:7.3.1611
+  copy:
+    - src: $GOPATH/bin/tinydns-healthcheck
+      dest: /lain/app/tinydns-healthcheck
+
+proc.server:
+  cmd: sleep infinity
+
+proc.client:
+  cmd:
