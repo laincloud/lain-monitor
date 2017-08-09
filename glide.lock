@@ -1,6 +1,8 @@
 hash: 7e56b35d46431507fef24f5808aa3b66cb6c324e05861bcfab1e451471324ee2
-updated: 2017-08-09T17:06:30.722311405+08:00
+updated: 2017-08-10T14:28:15.423266691+08:00
 imports:
+- name: github.com/go-zoo/bone
+  version: fd0aebc74e908868b09ac140fb5a53cb363884c1
 - name: go.uber.org/atomic
   version: 4e336646b2ef9fc6e47be8e21594178f98e5ebcf
 - name: go.uber.org/multierr
