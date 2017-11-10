@@ -1,17 +1,17 @@
 appname: tinydns-healthcheck
 
 build:
-  base: laincloud/golang:1.8.3
+  base: golang:1.9
   prepare:
-    version: 201708101429
+    version: 201711101029
     script:
-      - curl https://glide.sh/get | sh
+      - go get -u github.com/golang/dep/cmd/dep
       - mkdir -p $GOPATH/src/github.com/laincloud/tinydns-healthcheck
       - cp -rf . $GOPATH/src/github.com/laincloud/tinydns-healthcheck
-      - cd $GOPATH/src/github.com/laincloud/tinydns-healthcheck && glide install
+      - cd $GOPATH/src/github.com/laincloud/tinydns-healthcheck && dep ensure
   script:
     - cp -rf . $GOPATH/src/github.com/laincloud/tinydns-healthcheck
-    - cd $GOPATH/src/github.com/laincloud/tinydns-healthcheck && go install
+    - go install github.com/laincloud/tinydns-healthcheck
 
 release:
   dest_base: laincloud/centos:7.3.1611
