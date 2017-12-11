@@ -1,12 +1,10 @@
-# tinydns-healthcheck
+# lain-health
 
-一个监控 [tinydns](https://github.com/laincloud/tinydns) 状态的 LAIN 应用。
+一个监控 LAIN 集群状态的 LAIN 应用。
 
-## 背景
+## TODO
 
-在 LAIN 集群里，tinydns 负责应用内部各 proc 之间、service 和 resource 的域名解析，
-具有很重要的作用。如果 tinydns 挂掉，需要报警。tinydns-healthcheck 提供了一个
-HTTP 服务，返回 tinydns 的工作状态。
+- [ ] tinydns
 
 ## 架构
 
@@ -15,3 +13,8 @@ HTTP 服务，返回 tinydns 的工作状态。
 `server-1` 的 IP 地址，如果可以解析，则返回 `OK`，否则返回 `Down`。然后在
 [hagrid](https://github.com/laincloud/hagrid) 里配置 HTTP 报警即可监控 tinydns
 状态。
+
+### TinyDNS
+
+- 检测 proc A 是否能解析同一个 App 内的另一个 proc B 的域名
+- 验证域名解析是否正确
