@@ -1,28 +1,33 @@
-appname: tinydns-healthcheck
+appname: lain-health
 
 build:
   base: golang:1.9
   prepare:
-    version: 201711101029
+    version: 201712111029
     script:
       - go get -u github.com/golang/dep/cmd/dep
-      - mkdir -p $GOPATH/src/github.com/laincloud/tinydns-healthcheck
-      - cp -rf . $GOPATH/src/github.com/laincloud/tinydns-healthcheck
-      - cd $GOPATH/src/github.com/laincloud/tinydns-healthcheck && dep ensure
+      - mkdir -p $GOPATH/src/github.com/laincloud/lain-health
+      - cp -rf . $GOPATH/src/github.com/laincloud/lain-health
+      - cd $GOPATH/src/github.com/laincloud/lain-health && dep ensure
   script:
-    - cp -rf . $GOPATH/src/github.com/laincloud/tinydns-healthcheck
-    - go install github.com/laincloud/tinydns-healthcheck
+    - cp -rf . $GOPATH/src/github.com/laincloud/lain-health
+    - go install github.com/laincloud/lain-health/server
+    - go install github.com/laincloud/lain-health/client
 
 release:
-  dest_base: laincloud/centos:7.3.1611
+  dest_base: laincloud/centos:7.4.1708
   copy:
-    - src: $GOPATH/bin/tinydns-healthcheck
-      dest: /lain/app/tinydns-healthcheck
+    - src: $GOPATH/bin/server
+      dest: /lain/app/server
+    - src: $GOPATH/bin/client
+      dest: /lain/app/client
 
 proc.server:
-  cmd: sleep infinity
+  cmd: /lain/app/server
+  port: 8080
+  healthcheck: /ping
 
 web:
-  cmd: /lain/app/tinydns-healthcheck
+  cmd: /lain/app/client
   port: 8080
   healthcheck: /ping
