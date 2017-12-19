@@ -1,18 +1,18 @@
-appname: lain-health
+appname: lain-monitor
 
 build:
   base: golang:1.9
   prepare:
-    version: 201712111029
+    version: 201712171029
     script:
       - go get -u github.com/golang/dep/cmd/dep
-      - mkdir -p $GOPATH/src/github.com/laincloud/lain-health
-      - cp -rf . $GOPATH/src/github.com/laincloud/lain-health
-      - cd $GOPATH/src/github.com/laincloud/lain-health && dep ensure
+      - mkdir -p $GOPATH/src/github.com/laincloud/lain-monitor
+      - cp -rf . $GOPATH/src/github.com/laincloud/lain-monitor
+      - cd $GOPATH/src/github.com/laincloud/lain-monitor && dep ensure
   script:
-    - cp -rf . $GOPATH/src/github.com/laincloud/lain-health
-    - go install github.com/laincloud/lain-health/server
-    - go install github.com/laincloud/lain-health/client
+    - cp -rf . $GOPATH/src/github.com/laincloud/lain-monitor
+    - go install github.com/laincloud/lain-monitor/server
+    - go install github.com/laincloud/lain-monitor/client
 
 release:
   dest_base: laincloud/centos:7.4.1708
@@ -28,6 +28,9 @@ proc.server:
   healthcheck: /ping
 
 web:
-  cmd: /lain/app/client
+  cmd: /lain/app/client -config /lain/app/client-prod.json
   port: 8080
   healthcheck: /ping
+  secret_files:
+    - /lain/app/client-prod.json
+  memory: 64M

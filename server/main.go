@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/laincloud/lain-health/common"
+	"github.com/laincloud/lain-monitor/common"
 	"go.uber.org/zap"
 )
 
