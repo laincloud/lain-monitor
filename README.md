@@ -18,7 +18,7 @@
 ```
 lain reposit ${LAIN-cluster}
 
-# 填写 client-example.json 里的配置信息，并复制为 client-prod.json
+# 填写 client-example.json 里的配置信息，然后复制为 client-prod.json
 lain secret add -f client-prod.json ${LAIN-cluster} web /lain/app/client-prod.json
 
 lain build
