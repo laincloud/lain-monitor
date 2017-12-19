@@ -22,6 +22,7 @@ func runDaemon(ctx context.Context, graphite *Graphite, logger *zap.Logger) {
 			logger.Info("collectDockerReservedMemory done.", zap.Time("now", now))
 		case <-ctx.Done():
 			logger.Warn("runDaemon() has been cancelled.")
+			return
 		}
 	}
 }

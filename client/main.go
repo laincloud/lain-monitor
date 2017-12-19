@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/laincloud/lain-monitor/common"
 	"go.uber.org/zap"
@@ -53,7 +54,11 @@ func main() {
 	}()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	defer func() {
+		cancel()
+		time.Sleep(100 * time.Millisecond)
+		logger.Warn("ctx has been cancelled.")
+	}()
 
 	go runDaemon(ctx, graphite, logger)
 
@@ -73,7 +78,9 @@ func main() {
 	defer func() {
 		if err := server.Shutdown(context.Background()); err != nil {
 			logger.Error("server.Shutdown() failed.", zap.Error(err))
+			return
 		}
+		logger.Info("server has been shutdown.")
 	}()
 	logger.Info("server.ListenAndServe()...", zap.String("Addr", server.Addr))
 

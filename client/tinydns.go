@@ -21,6 +21,11 @@ func getTinyDNSStatus(w http.ResponseWriter, r *http.Request, logger *zap.Logger
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	defer func() {
+		if err1 := resp.Body.Close(); err1 != nil {
+			logger.Error("resp.Body.Close() failed.", zap.Error(err1))
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		logger.Error("http.Get() failed.",
