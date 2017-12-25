@@ -15,7 +15,7 @@ build:
     - go install github.com/laincloud/lain-monitor/client
 
 release:
-  dest_base: laincloud/centos:7.4.1708
+  dest_base: laincloud/centos:7
   copy:
     - src: $GOPATH/bin/server
       dest: /lain/app/server
