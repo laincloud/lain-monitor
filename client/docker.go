@@ -84,7 +84,7 @@ func collectDockerReservedMemory(graphite *Graphite, logger *zap.Logger) {
 	}
 
 	for _, node := range swarmInfo.Nodes {
-		graphite.send(node.Name, dockerReservedMemoryMetric, node.ReservedMemory, logger)
+		graphite.Send(node.Name, dockerReservedMemoryMetric, node.ReservedMemory, logger)
 	}
 }
 
@@ -114,7 +114,7 @@ func parseSwarmInfo(resp swarmInfoResponse) (*swarmInfo, error) {
 			return nil, err
 		}
 		nodes[i] = swarmNodeInfo{
-			Name:           resp.SystemStatus[offset][0],
+			Name:           strings.TrimSpace(resp.SystemStatus[offset][0]),
 			ReservedMemory: reservedMemory,
 			TotalMemory:    totalMemory,
 		}
