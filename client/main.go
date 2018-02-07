@@ -43,19 +43,15 @@ func main() {
 	if err != nil {
 		logger.Fatal("newConfig() failed.", zap.String("filename", *configFile), zap.Error(err))
 	}
-	graphite, err := NewGraphite(c.GraphiteAddr, logger)
-	if err != nil {
-		logger.Fatal("newGraphite() failed.", zap.String("addr", c.GraphiteAddr), zap.Error(err))
-	}
-	defer func() {
-		if err1 := graphite.Close(); err1 != nil {
-			logger.Error("graphite.Close() failed.", zap.Error(err1))
-		}
-	}()
 
+	graphite := NewGraphite(c.GraphiteAddr)
 	ctx, cancel := context.WithCancel(context.Background())
-
 	go runDaemon(ctx, graphite, logger)
+	defer func() {
+		cancel()
+		time.Sleep(100 * time.Millisecond)
+		logger.Info("Context has been cancelled.")
+	}()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/tinydns_status", common.Handle(getTinyDNSStatus, logger))
@@ -79,7 +75,4 @@ func main() {
 	} else {
 		logger.Info("Server has been shutdown.")
 	}
-	cancel()
-	time.Sleep(100 * time.Millisecond)
-	logger.Info("Context has been cancelled.")
 }

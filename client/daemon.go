@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	collectInterval = 600 * time.Second
+	collectInterval = 3 * time.Minute
 )
 
 func runDaemon(ctx context.Context, graphite *Graphite, logger *zap.Logger) {

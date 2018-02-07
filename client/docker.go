@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -83,9 +84,16 @@ func collectDockerReservedMemory(graphite *Graphite, logger *zap.Logger) {
 		return
 	}
 
-	for _, node := range swarmInfo.Nodes {
-		graphite.Send(node.Name, dockerReservedMemoryMetric, node.ReservedMemory, logger)
+	metrics := make([]GraphiteMetric, len(swarmInfo.Nodes))
+	timestamp := time.Now()
+	for i, node := range swarmInfo.Nodes {
+		metrics[i] = GraphiteMetric{
+			Path:      fmt.Sprintf("%s.%s", node.Name, dockerReservedMemoryMetric),
+			Value:     node.ReservedMemory,
+			Timestamp: timestamp,
+		}
 	}
+	graphite.Send(metrics, logger)
 }
 
 func parseSwarmInfo(resp swarmInfoResponse) (*swarmInfo, error) {
