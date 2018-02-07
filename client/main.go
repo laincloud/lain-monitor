@@ -43,22 +43,17 @@ func main() {
 	if err != nil {
 		logger.Fatal("newConfig() failed.", zap.String("filename", *configFile), zap.Error(err))
 	}
-	graphite, err := newGraphite(c.GraphiteAddr)
+	graphite, err := NewGraphite(c.GraphiteAddr, logger)
 	if err != nil {
 		logger.Fatal("newGraphite() failed.", zap.String("addr", c.GraphiteAddr), zap.Error(err))
 	}
 	defer func() {
-		if err1 := graphite.close(); err1 != nil {
-			logger.Error("graphite.close() failed.", zap.Error(err1))
+		if err1 := graphite.Close(); err1 != nil {
+			logger.Error("graphite.Close() failed.", zap.Error(err1))
 		}
 	}()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	defer func() {
-		cancel()
-		time.Sleep(100 * time.Millisecond)
-		logger.Warn("ctx has been cancelled.")
-	}()
 
 	go runDaemon(ctx, graphite, logger)
 
@@ -75,15 +70,16 @@ func main() {
 			logger.Error("server.ListenAndServe() failed.", zap.String("Addr", server.Addr), zap.Error(err))
 		}
 	}()
-	defer func() {
-		if err := server.Shutdown(context.Background()); err != nil {
-			logger.Error("server.Shutdown() failed.", zap.Error(err))
-			return
-		}
-		logger.Info("server has been shutdown.")
-	}()
 	logger.Info("server.ListenAndServe()...", zap.String("Addr", server.Addr))
 
 	<-quit
 	logger.Info("Shutting down...")
+	if err := server.Shutdown(context.Background()); err != nil {
+		logger.Error("server.Shutdown() failed.", zap.Error(err))
+	} else {
+		logger.Info("Server has been shutdown.")
+	}
+	cancel()
+	time.Sleep(100 * time.Millisecond)
+	logger.Info("Context has been cancelled.")
 }

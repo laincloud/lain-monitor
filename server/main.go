@@ -39,13 +39,13 @@ func main() {
 			logger.Error("server.ListenAndServe() failed.", zap.String("Addr", server.Addr), zap.Error(err))
 		}
 	}()
-	defer func() {
-		if err := server.Shutdown(context.Background()); err != nil {
-			logger.Error("server.Shutdown() failed.", zap.Error(err))
-		}
-	}()
 	logger.Info("server.ListenAndServe()...", zap.String("Addr", server.Addr))
 
 	<-quit
 	logger.Info("Shutting down...")
+	if err := server.Shutdown(context.Background()); err != nil {
+		logger.Error("server.Shutdown() failed.", zap.Error(err))
+	} else {
+		logger.Info("Server has been shutdown.")
+	}
 }
