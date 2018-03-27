@@ -44,7 +44,12 @@ func main() {
 		logger.Fatal("newConfig() failed.", zap.String("filename", *configFile), zap.Error(err))
 	}
 
-	graphite := NewGraphite(c.GraphiteAddr)
+	graphite, err := NewGraphite(c.GraphiteAddr)
+	if err != nil {
+		logger.Fatal("NewGraphite() failed.", zap.Error(err))
+	}
+	defer graphite.Close()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	go runDaemon(ctx, graphite, logger)
 	defer func() {
