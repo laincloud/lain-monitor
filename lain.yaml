@@ -26,6 +26,7 @@ proc.server:
   cmd: /lain/app/server
   port: 8080
   healthcheck: /ping
+  memory: 128m
 
 web:
   cmd: /lain/app/client -config /lain/app/client-prod.json
@@ -33,4 +34,4 @@ web:
   healthcheck: /ping
   secret_files:
     - /lain/app/client-prod.json
-  memory: 64M
+  memory: 128M
