@@ -3,7 +3,7 @@ appname: lain-monitor
 build:
   base: golang:1.9
   prepare:
-    version: 201712171029
+    version: 201804111457
     script:
       - go get -u github.com/golang/dep/cmd/dep
       - mkdir -p $GOPATH/src/github.com/laincloud/lain-monitor
@@ -26,6 +26,7 @@ proc.server:
   cmd: /lain/app/server
   port: 8080
   healthcheck: /ping
+  memory: 128m
 
 web:
   cmd: /lain/app/client -config /lain/app/client-prod.json
@@ -33,4 +34,4 @@ web:
   healthcheck: /ping
   secret_files:
     - /lain/app/client-prod.json
-  memory: 64M
+  memory: 128M

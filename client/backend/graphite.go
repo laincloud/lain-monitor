@@ -1,8 +1,10 @@
-package main
+package backend
 
 import (
 	"fmt"
 	"net"
+	"sort"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -17,7 +19,7 @@ type Graphite struct {
 }
 
 // NewGraphite create a new Graphite
-func NewGraphite(addr string) (*Graphite, error) {
+func NewGraphite(addr string) (Backend, error) {
 	conn, err := net.DialTimeout("udp", addr, timeout)
 	if err != nil {
 		return nil, err
@@ -30,9 +32,24 @@ func NewGraphite(addr string) (*Graphite, error) {
 }
 
 // Send sends metric value to hostname
-func (g *Graphite) Send(metrics []GraphiteMetric, logger *zap.Logger) {
+func (g *Graphite) Send(metrics []*Metric, logger *zap.Logger) {
 	for _, m := range metrics {
-		if _, err := fmt.Fprintf(g.conn, "%s %v %d\n", m.Path, m.Value, m.Timestamp.Unix()); err != nil {
+		// append all values in tags to beginning of the Path,
+		// values should stay in the same order of the keys
+		var tagKeys []string
+		var tagVals []string
+		for k := range m.Tags {
+			tagKeys = append(tagKeys, k)
+		}
+		sort.Strings(tagKeys)
+		for _, k := range tagKeys {
+			tagVals = append(tagVals, m.Tags[k])
+		}
+		metricName := m.Path
+		if len(tagVals) > 0 {
+			metricName = strings.Join(tagVals, ".") + "." + m.Path
+		}
+		if _, err := fmt.Fprintf(g.conn, "%s %v %d\n", metricName, m.Value, m.Timestamp.Unix()); err != nil {
 			logger.Error("Graphite.Send() failed.", zap.Any("metric", m), zap.Error(err))
 			return
 		}
@@ -44,11 +61,4 @@ func (g *Graphite) Send(metrics []GraphiteMetric, logger *zap.Logger) {
 // Close close the underlying connection
 func (g *Graphite) Close() error {
 	return g.conn.Close()
-}
-
-// GraphiteMetric is the metric sent to graphite
-type GraphiteMetric struct {
-	Path      string
-	Value     interface{}
-	Timestamp time.Time
 }

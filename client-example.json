@@ -1,3 +1,6 @@
 {
-    "graphite_addr": "${ip}:${port}"
+  "backend_type": "open-falcon",
+  "graphite_addr": "${ip}:${port}",
+  "open_falcon_addr": "etcd.lain:1988",
+  "cluster_name": "lain"
 }

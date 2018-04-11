@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/laincloud/lain-monitor/client/backend"
 	"github.com/laincloud/lain-monitor/common"
 	"go.uber.org/zap"
 )
@@ -21,6 +22,7 @@ const (
 )
 
 var (
+	cfg        *config
 	configFile = flag.String("config", "", "configuration file")
 )
 
@@ -39,24 +41,39 @@ func main() {
 		logger.Fatal("config is required")
 	}
 
-	c, err := newConfig(*configFile, logger)
+	cfg, err = newConfig(*configFile, logger)
 	if err != nil {
 		logger.Fatal("newConfig() failed.", zap.String("filename", *configFile), zap.Error(err))
 	}
+	if cfg.ClusterName == "" {
+		logger.Fatal("cluster_name can't be empty.")
+	}
+	var bd backend.Backend
 
-	graphite, err := NewGraphite(c.GraphiteAddr)
+	if cfg.BackendType == "open-falcon" {
+		bd, err = backend.NewOpenFalconBackend(cfg.OpenFalconAddr)
+	} else if cfg.BackendType == "graphite" {
+		bd, err = backend.NewGraphite(cfg.GraphiteAddr)
+	} else {
+		logger.Fatal("unknow backend type")
+	}
+
 	if err != nil {
 		logger.Fatal("NewGraphite() failed.", zap.Error(err))
 	}
-	defer graphite.Close()
+	defer bd.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	go runDaemon(ctx, graphite, logger)
 	defer func() {
 		cancel()
 		time.Sleep(100 * time.Millisecond)
 		logger.Info("Context has been cancelled.")
 	}()
+
+	go runDaemon(ctx, bd, logger)
+	if err := runHealthCheckers(ctx, bd, logger); err != nil {
+		logger.Fatal("Create health checkers failed", zap.Error(err))
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/tinydns_status", common.Handle(getTinyDNSStatus, logger))

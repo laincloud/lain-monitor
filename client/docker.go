@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/laincloud/lain-monitor/client/backend"
 	"go.uber.org/zap"
 )
 
@@ -52,7 +53,7 @@ type swarmNodeInfo struct {
 	TotalMemory    int64 // Unit: B
 }
 
-func collectDockerReservedMemory(graphite *Graphite, logger *zap.Logger) {
+func collectDockerReservedMemory(bd backend.Backend, interval int, logger *zap.Logger) {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Warn("collectDockerReservedMemory recovered.", zap.Any("r", r))
@@ -84,16 +85,18 @@ func collectDockerReservedMemory(graphite *Graphite, logger *zap.Logger) {
 		return
 	}
 
-	metrics := make([]GraphiteMetric, len(swarmInfo.Nodes))
+	metrics := make([]*backend.Metric, len(swarmInfo.Nodes))
 	timestamp := time.Now()
 	for i, node := range swarmInfo.Nodes {
-		metrics[i] = GraphiteMetric{
-			Path:      fmt.Sprintf("%s.%s", node.Name, dockerReservedMemoryMetric),
-			Value:     node.ReservedMemory,
+		metrics[i] = &backend.Metric{
+			Path:      dockerReservedMemoryMetric,
+			Value:     float64(node.ReservedMemory),
+			Tags:      map[string]string{"host": node.Name, "cluster": cfg.ClusterName},
 			Timestamp: timestamp,
+			Step:      int64(interval),
 		}
 	}
-	graphite.Send(metrics, logger)
+	bd.Send(metrics, logger)
 }
 
 func parseSwarmInfo(resp swarmInfoResponse) (*swarmInfo, error) {
