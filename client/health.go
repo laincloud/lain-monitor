@@ -60,6 +60,7 @@ func _buildPacket(name string, isAlive bool) *backend.Metric {
 	return &backend.Metric{
 		Path:      name,
 		Value:     float64(health),
+		Tags:      map[string]string{"cluster": cfg.ClusterName},
 		Timestamp: time.Now(),
 		Step:      HEALTHCHECK_INTERVAL,
 	}

@@ -22,6 +22,7 @@ const (
 )
 
 var (
+	cfg        *config
 	configFile = flag.String("config", "", "configuration file")
 )
 
@@ -40,16 +41,19 @@ func main() {
 		logger.Fatal("config is required")
 	}
 
-	c, err := newConfig(*configFile, logger)
+	cfg, err = newConfig(*configFile, logger)
 	if err != nil {
 		logger.Fatal("newConfig() failed.", zap.String("filename", *configFile), zap.Error(err))
 	}
+	if cfg.ClusterName == "" {
+		logger.Fatal("cluster_name can't be empty.")
+	}
 	var bd backend.Backend
 
-	if c.BackendType == "open-falcon" {
-		bd, err = backend.NewOpenFalconBackend(c.OpenFalconAddr)
-	} else if c.BackendType == "graphite" {
-		bd, err = backend.NewGraphite(c.GraphiteAddr)
+	if cfg.BackendType == "open-falcon" {
+		bd, err = backend.NewOpenFalconBackend(cfg.OpenFalconAddr)
+	} else if cfg.BackendType == "graphite" {
+		bd, err = backend.NewGraphite(cfg.GraphiteAddr)
 	} else {
 		logger.Fatal("unknow backend type")
 	}

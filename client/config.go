@@ -11,6 +11,7 @@ type config struct {
 	BackendType    string `json:"backend_type"`
 	GraphiteAddr   string `json:"graphite_addr"`
 	OpenFalconAddr string `json:"open_falcon_addr"`
+	ClusterName    string `json:"cluster_name"`
 }
 
 func newConfig(filename string, logger *zap.Logger) (*config, error) {

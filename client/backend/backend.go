@@ -9,7 +9,7 @@ import (
 type Metric struct {
 	Path      string
 	Value     float64
-	Tags      string
+	Tags      map[string]string
 	Timestamp time.Time
 	Step      int64
 }

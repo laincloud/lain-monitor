@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"go.uber.org/zap"
 )
@@ -41,10 +42,15 @@ func NewOpenFalconBackend(addr string) (Backend, error) {
 func (g *OpenFalconBackend) Send(metrics []*Metric, logger *zap.Logger) {
 	var packets []*openFalconMsg
 	for _, m := range metrics {
+		var tagSlice []string
+		for k, v := range m.Tags {
+			tagSlice = append(tagSlice, fmt.Sprintf("%s=%s", k, v))
+		}
+
 		pkt := &openFalconMsg{
 			Metric:      m.Path,
 			Endpoint:    DEFAULT_ENDPOINT,
-			Tags:        m.Tags,
+			Tags:        strings.Join(tagSlice, ","),
 			Value:       m.Value,
 			Timestamp:   m.Timestamp.Unix(),
 			CounterType: "GAUGE",

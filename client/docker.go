@@ -89,8 +89,9 @@ func collectDockerReservedMemory(bd backend.Backend, interval int, logger *zap.L
 	timestamp := time.Now()
 	for i, node := range swarmInfo.Nodes {
 		metrics[i] = &backend.Metric{
-			Path:      fmt.Sprintf("%s.%s", node.Name, dockerReservedMemoryMetric),
+			Path:      dockerReservedMemoryMetric,
 			Value:     float64(node.ReservedMemory),
+			Tags:      map[string]string{"host": node.Name, "cluster": cfg.ClusterName},
 			Timestamp: timestamp,
 			Step:      int64(interval),
 		}
